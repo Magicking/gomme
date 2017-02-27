@@ -9,31 +9,39 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var cmdList map[string]string
+type command struct {
+	BinPath string
+	Args []string
+	Pattern string
+}
+
+var cmdList map[string]command
 
 func CmdHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	cmdString := cmdList[vars["cmd"]]
-	if cmdString == "" {
+	cmd, ok := cmdList[vars["cmd"]]
+	if !ok { //Todo add test for that
 		log.Print("Command not found for ", vars["cmd"])
 		return
 	}
-	cmd := exec.Command("/bin/sh", "-c", cmdString)
+	cmdExec := exec.Command(cmd.BinPath, cmd.Args...)
 
-	cmd.Stdout = io.Writer(w)
-	if err := cmd.Run(); err != nil {
-		fmt.Fprintf(w, "Hello, %s", "HERE GOES ERR MSG")
-		log.Print("HERE GOES ERR MSG")
+	cmdExec.Stdout = io.Writer(w)
+	if err := cmdExec.Run(); err != nil {
+		fmt.Fprintf(w, "error: %s", err)
+		log.Print("cmd: ", cmd.BinPath, " error: ", err)
 	}
 }
 
 func main() {
-	cmdList = make(map[string]string)
-	cmdList["screenoff"] = "/usr/bin/xset dpms force off"
-	cmdList["volumeup"] = "/usr/bin/pulseaudio-ctl up"
-	cmdList["volumedown"] = "/usr/bin/pulseaudio-ctl down"
-	cmdList["volumeinfo"] = "/usr/bin/pulseaudio-ctl full-status"
+	cmdList = make(map[string]command)
+	cmdList["screenoff"] = command{"/usr/bin/xset", []string{"dpms", "force", "off"}, ""}
+	cmdList["volumeup"] =   command{"/usr/bin/pulseaudio-ctl", []string{"up"}, ""}
+	cmdList["volumedown"] = command{"/usr/bin/pulseaudio-ctl", []string{"down"}, ""}
+	cmdList["volumeinfo"] = command{"/usr/bin/pulseaudio-ctl", []string{"full-status"}, ""}
 	r := mux.NewRouter()
-	r.HandleFunc("/{cmd}", CmdHandler)
-	log.Fatal(http.ListenAndServe(":8080", r))
+	for i := range cmdList {
+		r.HandleFunc("/gomme-api/{cmd}" + cmdList[i].Pattern, CmdHandler)
+	}
+	log.Fatal(http.ListenAndServe(":8080", r)) // Change to localhost on prod
 }
