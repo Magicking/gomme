@@ -58,8 +58,8 @@ func main() {
 	cmdList["volumeup"] =   command{"/usr/bin/pulseaudio-ctl", []string{"up"}, ""}
 	cmdList["volumedown"] = command{"/usr/bin/pulseaudio-ctl", []string{"down"}, ""}
 	cmdList["volumeinfo"] = command{"/usr/bin/pulseaudio-ctl", []string{"full-status"}, ""}
-	cmdList["F"] = command{"/usr/bin/xvkbd", []string{"-text"}, "F"}
-	cmdList["F11"] = command{"/usr/bin/xvkbd", []string{"-text"}, "\\{F11}"}
+	cmdList["F"] = command{"/usr/bin/xvkbd", []string{"-text", "F"}, ""}
+	cmdList["F11"] = command{"/usr/bin/xvkbd", []string{"-text", "\\{F11}"}, ""}
 	r := mux.NewRouter()
 	for i := range cmdList {
 		r.HandleFunc("/gomme-api/{cmd}" + cmdList[i].Pattern, CmdHandler)
