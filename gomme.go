@@ -60,6 +60,7 @@ func main() {
 	cmdList["volumeinfo"] = command{"/usr/bin/pulseaudio-ctl", []string{"full-status"}, ""}
 	cmdList["F"] = command{"/usr/bin/xvkbd", []string{"-text", "F"}, ""}
 	cmdList["F11"] = command{"/usr/bin/xvkbd", []string{"-text", "\\{F11}"}, ""}
+	cmdList["togglelight"] = command{"utils/toggle.sh", nil, ""}
 	r := mux.NewRouter()
 	for i := range cmdList {
 		r.HandleFunc("/gomme-api/{cmd}" + cmdList[i].Pattern, CmdHandler)
