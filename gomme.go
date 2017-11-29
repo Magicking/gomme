@@ -3,6 +3,7 @@ package main
 import (
 	"io"
 	"fmt"
+	"sort"
 	"os/exec"
 	"log"
 	"net/http"
@@ -43,6 +44,7 @@ func buttonsHandler(file_name string, w http.ResponseWriter, r *http.Request) {
 	for key := range cmdList {
 		buttons = append(buttons, key)
 	}
+	sort.Strings(buttons)
 	p := &Page{Buttons: buttons}
 	t, err := template.ParseFiles(file_name)
 	if err != nil {
